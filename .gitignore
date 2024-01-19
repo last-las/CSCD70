@@ -8,3 +8,7 @@ build
 
 # IDE
 .vscode
+
+# MODIFY
+.idea
+cmake-build-debug/
