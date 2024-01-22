@@ -6,7 +6,7 @@
 //      here.
 // RUN: opt -load-pass-plugin=%dylibdir/libFunctionInfo.so -passes=function-info -disable-output %basename_t.ll 2>&1 | \
 //      Check the output "CSCD70 Function Information Pass".
-// RUN: FileCheck --match-full-lines --check-prefix=SAMPLE %s
+// RUN: FileCheck --match-full-lines %s
 // clang-format on
 /// @todo(CSCD70) Please remove the `--check-prefix=SAMPLE` option.
 // SAMPLE: CSCD70 Function Information Pass
