@@ -37,22 +37,29 @@
 define dso_local void @AlgebraicIdentity(i32 noundef %0) {
 ; CHECK-LABEL: define dso_local void @AlgebraicIdentity(i32 noundef %0) {
 ; @todo(CSCD70) Please complete the CHECK directives.
+; NOTE: The other insts are removed.
   %2 = add nsw i32 %0, 0
   %3 = add nsw i32 0, %0
   %4 = mul nsw i32 %0, 1
   %5 = mul nsw i32 1, %0
   %6 = sub nsw i32 %0, 0
   %7 = sdiv i32 %0, 1
+; CHECK-NEXT: %2 = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef %0, i32 noundef %0, i32 noundef %0, i32 noundef %0, i32 noundef %0, i32 noundef %0)
   %8 = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef %2, i32 noundef %3, i32 noundef %4, i32 noundef %5, i32 noundef %6, i32 noundef %7)
+ ; CHECK-NEXT: ret void
   ret void
 }
 
 define dso_local void @StrengthReduction(i32 noundef %0) {
 ; CHECK-LABEL: define dso_local void @StrengthReduction(i32 noundef %0) {
 ; @todo(CSCD70) Please complete the CHECK directives.
+; CHECK-NEXT: %2 = shl i32 %0, 1
   %2 = mul nsw i32 %0, 2
+; CHECK-NEXT: %3 = shl i32 %0, 6
   %3 = mul nsw i32 64, %0
+; CHECK-NEXT: %4 = ashr i32 %0, 2
   %4 = sdiv i32 %0, 4
+; CHECK-NEXT: %5 = ashr i32 %0, 7
   %5 = sdiv i32 %0, 128
   %6 = call i32 (ptr, ...) @printf(ptr noundef @.str.1, i32 noundef %2, i32 noundef %3, i32 noundef %4, i32 noundef %5)
   ret void
