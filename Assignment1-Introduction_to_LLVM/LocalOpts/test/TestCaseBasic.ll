@@ -68,11 +68,17 @@ define dso_local void @StrengthReduction(i32 noundef %0) {
 define dso_local void @MultiInstOpt(i32 noundef %0, i32 noundef %1) {
 ; CHECK-LABEL: define dso_local void @MultiInstOpt(i32 noundef %0, i32 noundef %1) {
 ; @todo(CSCD70) Please complete the CHECK directives.
+; CHECK-NEXT: %3 = add nsw i32 %0, 3
   %3 = add nsw i32 %0, 3
+; NOTE: The next inst is removed: $4 = %0
   %4 = sub nsw i32 %3, 3
+; CHECK-NEXT: %4 = add nsw i32 %0, %1
   %5 = add nsw i32 %0, %1
+; NOTE: The next inst is removed: %6 = %0
   %6 = sub nsw i32 %5, %1
+; CHECK-NEXT: %5 = call i32 (ptr, ...) @printf(ptr noundef @.str.1, i32 noundef %3, i32 noundef %0, i32 noundef %4, i32 noundef %0)
   %7 = call i32 (ptr, ...) @printf(ptr noundef @.str.1, i32 noundef %3, i32 noundef %4, i32 noundef %5, i32 noundef %6)
+; CHECK-NEXT: ret void
   ret void
 }
 
