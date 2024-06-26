@@ -24,12 +24,26 @@ struct Expression final : DomainBase<Expression> {
   bool operator==(const Expression &Other) const final {
 
     /// @todo(CSCD70) Please complete this method.
+    if (this->Opcode == Other.Opcode) {
+      if (this->LHS == Other.LHS && this->RHS == Other.RHS) {
+        return true;
+      }
+
+      if (llvm::Instruction::isCommutative(this->Opcode) &&
+          this->LHS == Other.RHS && this->RHS == Other.LHS) {
+        return true;
+      }
+    }
+
     return false;
   }
 
   bool contain(const llvm::Value *const Val) const final {
 
     /// @todo(CSCD70) Please complete this method.
+    if (this->LHS == Val || this->RHS == Val) {
+      return true;
+    }
 
     return false;
   }
@@ -37,6 +51,20 @@ struct Expression final : DomainBase<Expression> {
                               const llvm::Value *const DstVal) const final {
 
     /// @todo(CSCD70) Please complete this method.
+    bool ContainValue = false;
+    const llvm::Value *NewLHS = this->LHS;
+    const llvm::Value *NewRHS = this->RHS;
+    if (this->LHS == SrcVal) {
+      ContainValue = true;
+      NewLHS = DstVal;
+    }
+    if (this->RHS == SrcVal) {
+      ContainValue = true;
+      NewRHS = DstVal;
+    }
+    if (ContainValue) {
+      return Expression(this->Opcode, NewLHS, NewRHS);
+    }
 
     return *this;
   }
@@ -65,6 +93,9 @@ template <> struct hash<::dfa::Expression> {
     size_t HashVal = 0;
 
     /// @todo(CSCD70) Please complete this method.
+    std::hash<const llvm::Value *> Hasher;
+
+    hashCombine(&HashVal, Expr.Opcode, Hasher(Expr.LHS) ^ Hasher(Expr.RHS));
 
     return HashVal;
   }

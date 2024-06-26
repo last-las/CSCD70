@@ -15,4 +15,9 @@ raw_ostream &operator<<(raw_ostream &Outs, const Expression &Expr) {
 void Expression::Initializer::visitBinaryOperator(BinaryOperator &BO) {
 
   /// @todo(CSCD70) Please complete this method.
+  auto Expr = dfa::Expression(BO);
+  if (!DomainIdMap.count(Expr)) {
+    DomainVector.push_back(Expr);
+    DomainIdMap[Expr] = DomainVector.size() - 1;
+  }
 }

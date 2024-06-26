@@ -72,6 +72,9 @@ protected:
     MeetOperands_t MeetOperands = getMeetOperands(BB);
 
     /// @todo(CSCD70) Please complete this method.
+    if (MeetOperands.empty()) {
+      return bc();
+    }
 
     return meet(MeetOperands);
   }
@@ -90,6 +93,14 @@ protected:
     MeetOperands_t Operands;
 
     /// @todo(CSCD70) Please complete this method.
+    auto BBConstRange = getMeetBBConstRange(BB);
+    for (const auto* OpBB: BBConstRange) {
+      if (BVs.find(OpBB) != BVs.end()) {
+        Operands.push_back(BVs.find(OpBB)->second);
+      } else {
+        exit(1);
+      }
+    }
 
     return Operands;
   }
@@ -97,8 +108,14 @@ protected:
   DomainVal_t meet(const MeetOperands_t &MeetOperands) const {
 
     /// @todo(CSCD70) Please complete this method.
+    TMeetOp MeetOp;
 
-    return DomainVal_t(DomainIdMap.size());
+    DomainVal_t Result = MeetOp.top(DomainIdMap.size());
+    for (uint64_t I = 0; I < MeetOperands.size(); I++) {
+      Result = MeetOp(Result, MeetOperands[I]);
+    }
+
+    return Result;
   }
 
   /// @}
@@ -123,6 +140,22 @@ protected:
     bool Changed = false;
 
     /// @todo(CSCD70) Please complete this method.
+    for (const llvm::BasicBlock* const BB: getBBConstRange(F)) {
+      auto IDV = getBoundaryVal(*BB);
+      for (const auto& Inst: getInstConstRange(*BB)) {
+        if (!InstDomainValMap.count(&Inst)) {
+          InstDomainValMap[&Inst] = bc();
+        }
+        DomainVal_t ODV = InstDomainValMap[&Inst];
+        if (transferFunc(Inst, IDV, ODV)) {
+          Changed = true;
+          InstDomainValMap[&Inst] = ODV;
+        }
+        IDV = ODV;
+      }
+
+      BVs[BB] = IDV;
+    }
 
     return Changed;
   }
@@ -144,6 +177,11 @@ protected:
                                llvm::FunctionAnalysisManager &FAM) {
 
     /// @todo(CSCD70) Please complete this method.
+    // weird place to init in my view... but I cannot find a better place currently
+    auto Initializer = typename TDomainElem::Initializer(DomainIdMap, DomainVector);
+    Initializer.visit(F);
+
+    while (traverseCFG(F));
 
     return std::make_tuple(DomainIdMap, DomainVector, BVs, InstDomainValMap);
   }

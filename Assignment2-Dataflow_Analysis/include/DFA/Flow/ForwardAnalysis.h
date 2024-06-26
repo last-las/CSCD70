@@ -1,5 +1,7 @@
 #pragma once // NOLINT(llvm-header-guard)
 
+#include <llvm/ADT/PostOrderIterator.h>
+
 #include "Framework.h"
 
 namespace dfa {
@@ -8,7 +10,8 @@ namespace dfa {
 
 typedef llvm::iterator_range<llvm::const_pred_iterator>
     ForwardMeetBBConstRange_t;
-typedef llvm::iterator_range<llvm::Function::const_iterator>
+// typedef llvm::iterator_range<llvm::Function::const_iterator>
+typedef llvm::iterator_range<llvm::ipo_iterator<const llvm::Function *>>
     ForwardBBConstRange_t;
 typedef llvm::iterator_range<llvm::BasicBlock::const_iterator>
     ForwardInstConstRange_t;
@@ -57,7 +60,8 @@ protected:
     return make_range(BB.begin(), BB.end());
   }
   BBConstRange_t getBBConstRange(const llvm::Function &F) const final {
-    return make_range(F.begin(), F.end());
+    // return make_range(F.begin(), F.end());
+    return llvm::inverse_post_order(&F);
   }
 };
 

@@ -26,6 +26,10 @@ template <typename TValue> struct Intersect final : MeetOpBase<TValue> {
                          const DomainVal_t &RHS) const final {
 
     /// @todo(CSCD70) Please complete this method.
+    auto Result = DomainVal_t(LHS.size());
+    for (uint64_t I = 0; I < LHS.size(); I++) {
+      Result[I] = LHS[I] & RHS[I];
+    }
 
     return LHS;
   }
@@ -33,7 +37,7 @@ template <typename TValue> struct Intersect final : MeetOpBase<TValue> {
 
     /// @todo(CSCD70) Please complete this method.
 
-    return DomainVal_t(DomainSize);
+    return DomainVal_t(DomainSize, TValue::top());
   }
 };
 
